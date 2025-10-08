@@ -1,29 +1,26 @@
+"use client";
+import { useState } from "react";
 import AuthLayout from "@/components/AuthLayout";
 import Input from "@/components/Input";
+import Button from "@/components/Button";
 import Link from "next/link";
 
 export default function SignUpPage() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   return (
     <AuthLayout title="Sign Up" subtitle="Create an account">
-      <form className="flex flex-col">
-        <Input placeholder="Username" />
-        <Input placeholder="Email address" type="email" />
-        <Input placeholder="Password" type="password" />
+      <img src="/signup-illustration.png" alt="illustration" className="mb-4 w-48 h-auto" />
+      <Input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+      <Input placeholder="Email address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <Input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-        <button
-          type="submit"
-          className="bg-[#F59E0B] text-white py-3 rounded-lg font-semibold hover:bg-[#d78a09]"
-        >
-          Register
-        </button>
-
-        <p className="text-center text-sm mt-4 text-gray-600">
-          Already have an account?{" "}
-          <Link href="/" className="text-[#0F1A2A] font-semibold">
-            Log In
-          </Link>
-        </p>
-      </form>
+      <Button label="Register" />
+      <p className="text-center text-sm mt-4 text-gray-600">
+        Already have an account? <Link href="/" className="text-[#0F1A2A] font-semibold">Log In</Link>
+      </p>
     </AuthLayout>
   );
 }
