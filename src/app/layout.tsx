@@ -32,7 +32,7 @@ function MobileNav() {
     { href: "/profil", label: "Profil", icon: "👤" },
   ];
 
-  // hanya tampil di halaman setelah login
+  // hanya tampil di halaman yang sudah login
   if (
     !pathname.startsWith("/dashboard") &&
     !pathname.startsWith("/lowongan") &&
@@ -43,19 +43,22 @@ function MobileNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg flex justify-around py-2 text-sm md:hidden">
-      {links.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={`flex flex-col items-center ${
-            pathname === link.href ? "text-[#F59E0B]" : "text-gray-500"
-          }`}
-        >
-          <span className="text-lg">{link.icon}</span>
-          <span>{link.label}</span>
-        </Link>
-      ))}
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.05)] flex justify-between px-6 py-2 text-xs md:hidden">
+      {links.map((link) => {
+        const isActive = pathname === link.href;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={`flex flex-col items-center justify-center w-1/4 text-center transition-all ${
+              isActive ? "text-[#F59E0B] scale-105 font-semibold" : "text-gray-500"
+            }`}
+          >
+            <span className="text-xl leading-none mb-1">{link.icon}</span>
+            <span className="text-[11px]">{link.label}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }
