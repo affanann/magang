@@ -14,7 +14,8 @@ export default function LoginPage() {
     e.preventDefault();
     if (email && password) {
       localStorage.setItem("isLoggedIn", "true");
-      router.push("/home");
+      // ✅ ubah redirect ke /dashboard
+      router.push("/dashboard");
     } else {
       alert("Masukkan email dan kata sandi terlebih dahulu.");
     }
@@ -69,14 +70,23 @@ export default function LoginPage() {
           <div className="mt-6 flex flex-col gap-2 text-sm">
             <button
               type="button"
-              onClick={() => router.push("/home")}
+              onClick={() => {
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("role", "mahasiswa");
+                router.push("/dashboard");
+              }}
               className="border border-gray-300 rounded-lg py-2 hover:bg-gray-100"
             >
               Masuk sebagai Mahasiswa
             </button>
+
             <button
               type="button"
-              onClick={() => router.push("/home")}
+              onClick={() => {
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("role", "perusahaan");
+                router.push("/dashboard");
+              }}
               className="border border-gray-300 rounded-lg py-2 hover:bg-gray-100"
             >
               Masuk sebagai Perusahaan
