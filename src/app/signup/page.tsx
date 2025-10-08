@@ -2,30 +2,25 @@ import AuthLayout from "@/components/AuthLayout";
 import Input from "@/components/Input";
 import Link from "next/link";
 
-export default function Page() {
+export default function SignUpPage() {
   return (
-    <AuthLayout title="Login" subtitle="Halo, Welcome Back!">
+    <AuthLayout title="Sign Up" subtitle="Create an account">
       <form className="flex flex-col">
+        <Input placeholder="Username" />
         <Input placeholder="Email address" type="email" />
         <Input placeholder="Password" type="password" />
-
-        <div className="text-right text-sm mb-4">
-          <Link href="/forgot" className="text-[#0F1A2A] font-medium">
-            Forgot Password?
-          </Link>
-        </div>
 
         <button
           type="submit"
           className="bg-[#F59E0B] text-white py-3 rounded-lg font-semibold hover:bg-[#d78a09]"
         >
-          Login
+          Register
         </button>
 
         <p className="text-center text-sm mt-4 text-gray-600">
-          Don’t have an account?{" "}
-          <Link href="/signup" className="text-[#0F1A2A] font-semibold">
-            Sign Up
+          Already have an account?{" "}
+          <Link href="/" className="text-[#0F1A2A] font-semibold">
+            Log In
           </Link>
         </p>
       </form>
