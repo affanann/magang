@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import Link from "next/link";
@@ -7,51 +8,81 @@ import Link from "next/link";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email && password) {
+      localStorage.setItem("isLoggedIn", "true");
+      router.push("/home");
+    } else {
+      alert("Masukkan email dan kata sandi terlebih dahulu.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0F1A2A] flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 md:p-10">
-        {/* Header */}
-        <h1 className="text-3xl font-extrabold text-[#0F1A2A] mb-1 text-center">Login</h1>
+        <h1 className="text-3xl font-extrabold text-[#0F1A2A] mb-1 text-center">
+          Masuk
+        </h1>
         <p className="text-sm text-gray-500 text-center mb-8">
-          Hallo, Welcome Back!
+          Selamat datang kembali!
         </p>
 
-        {/* Form */}
-        <form className="flex flex-col">
+        <form onSubmit={handleLogin} className="flex flex-col">
           <Input
-            placeholder="Email address"
+            placeholder="Alamat email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <Input
-            placeholder="Password"
+            placeholder="Kata sandi"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 
           <div className="text-right text-sm mb-4 mt-1">
-            <Link href="/forgot" className="text-[#0F1A2A] font-semibold hover:underline">
-              Forgot Password?
+            <Link
+              href="/forgot"
+              className="text-[#0F1A2A] font-semibold hover:underline"
+            >
+              Lupa Kata Sandi?
             </Link>
           </div>
 
-          <Button label="Login" type="submit" />
+          <Button label="Masuk" type="submit" />
 
           <p className="text-center text-sm mt-4 text-gray-600">
-            Don’t have an account?{" "}
-            <Link href="/signup" className="text-[#0F1A2A] font-semibold hover:underline">
-              Sign Up
+            Belum punya akun?{" "}
+            <Link
+              href="/signup"
+              className="text-[#0F1A2A] font-semibold hover:underline"
+            >
+              Daftar
             </Link>
           </p>
-        </form>
-      </div>
 
-      {/* Footer */}
-      <div className="absolute bottom-4 text-xs text-gray-400 text-center w-full">
-        By <span className="font-semibold text-white">Hunter Nac</span>
+          {/* Login cepat dummy */}
+          <div className="mt-6 flex flex-col gap-2 text-sm">
+            <button
+              type="button"
+              onClick={() => router.push("/home")}
+              className="border border-gray-300 rounded-lg py-2 hover:bg-gray-100"
+            >
+              Masuk sebagai Mahasiswa
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/home")}
+              className="border border-gray-300 rounded-lg py-2 hover:bg-gray-100"
+            >
+              Masuk sebagai Perusahaan
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
