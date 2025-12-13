@@ -45,19 +45,19 @@ export default function LoginPage() {
             <div className="flex justify-center mb-3">
               <div className="rounded-2xl bg-white shadow-sm ring-1 ring-black/5 px-4 py-3">
                 <Image
-                  src="/logo-maganging.png"
-                  alt="Maganging"
+                  src="/logo-magangin.png"
+                  alt="Magangin"
                   width={150}
                   height={150}
                   priority
-                  className="w-[140px] h-auto"
+                  className="w-[140px] h-auto select-none"
                 />
               </div>
             </div>
 
             {/* Title */}
             <h1 className="text-center text-xl sm:text-2xl font-extrabold text-[#0F1A2A]">
-              Masuk ke Maganging
+              Masuk ke Magangin
             </h1>
             <p className="text-center text-xs sm:text-sm text-slate-500 mt-1 mb-5">
               Silakan masuk untuk melanjutkan
@@ -114,6 +114,7 @@ export default function LoginPage() {
               <div className="pt-2 space-y-2">
                 <button
                   type="button"
+                  disabled={loading}
                   onClick={() => quickLogin("mahasiswa")}
                   className="btn-secondary"
                 >
@@ -122,6 +123,7 @@ export default function LoginPage() {
 
                 <button
                   type="button"
+                  disabled={loading}
                   onClick={() => quickLogin("perusahaan")}
                   className="btn-secondary"
                 >
@@ -132,18 +134,16 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-[11px] text-white/70 mt-4">
-            © {new Date().getFullYear()} Maganging
+            © {new Date().getFullYear()} Magangin
           </p>
         </div>
       </div>
 
-      {/* GLOBAL STYLE */}
       <style jsx global>{`
         .bg-animated {
           background: linear-gradient(135deg, #0b1220, #0f1a2a);
         }
 
-        /* Primary Yellow Button */
         .btn-primary-yellow {
           position: relative;
           width: 100%;
@@ -153,7 +153,7 @@ export default function LoginPage() {
           color: #0f1a2a;
           font-weight: 700;
           overflow: hidden;
-          transition: transform 160ms ease;
+          transition: transform 160ms ease, background 180ms ease;
         }
 
         .btn-primary-yellow:hover {
@@ -186,7 +186,6 @@ export default function LoginPage() {
           transform: translateX(120%);
         }
 
-        /* Secondary buttons */
         .btn-secondary {
           width: 100%;
           height: 40px;
@@ -195,7 +194,7 @@ export default function LoginPage() {
           background: white;
           color: #0f1a2a;
           font-weight: 600;
-          transition: background 200ms ease, transform 160ms ease;
+          transition: background 200ms ease, transform 160ms ease, opacity 160ms ease;
         }
 
         .btn-secondary:hover {
@@ -204,6 +203,11 @@ export default function LoginPage() {
 
         .btn-secondary:active {
           transform: scale(0.98);
+        }
+
+        .btn-secondary:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
         }
       `}</style>
     </>
