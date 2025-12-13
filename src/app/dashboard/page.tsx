@@ -7,6 +7,7 @@ import { magangData } from "@/data/magangData";
 type Role = "mahasiswa" | "perusahaan";
 
 type Kandidat = {
+  id: string;
   nama: string;
   kampus: string;
   posisi: string;
@@ -25,7 +26,6 @@ export default function DashboardPage() {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [events, setEvents] = useState<string[]>([]);
 
-  // ✅ cek login
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     const r = localStorage.getItem("role") as Role | null;
@@ -34,11 +34,9 @@ export default function DashboardPage() {
       router.push("/");
       return;
     }
-
     setRole(r);
   }, [router]);
 
-  // 🔹 Dummy data event kalender
   const eventData: Record<number, string[]> = {
     6: ["Pembukaan Magang Unilever", "Open registration Bank Indonesia"],
     13: ["Deadline Magenta BUMN"],
@@ -71,11 +69,10 @@ export default function DashboardPage() {
     },
   ];
 
-  // ✅ Dummy data untuk role-based
   const kandidatTerbaru: Kandidat[] = [
-    { nama: "Raka Pratama", kampus: "Universitas Sriwijaya", posisi: "UI/UX Intern", status: "Baru" },
-    { nama: "Nabila Putri", kampus: "Polsri", posisi: "Frontend Intern", status: "Diproses" },
-    { nama: "Dimas Fajar", kampus: "Universitas Indonesia", posisi: "Data Intern", status: "Baru" },
+    { id: "k1", nama: "Raka Pratama", kampus: "Universitas Sriwijaya", posisi: "UI/UX Intern", status: "Baru" },
+    { id: "k2", nama: "Nabila Putri", kampus: "Polsri", posisi: "Frontend Intern", status: "Diproses" },
+    { id: "k3", nama: "Dimas Fajar", kampus: "Universitas Indonesia", posisi: "Data Intern", status: "Baru" },
   ];
 
   const lamaranSaya: Lamaran[] = [
@@ -84,12 +81,8 @@ export default function DashboardPage() {
     { perusahaan: "Bank Indonesia", posisi: "Backend Intern", status: "Dikirim" },
   ];
 
-  const perusahaanLowonganSaya = useMemo(() => {
-    // untuk demo: ambil 3 data pertama dari magangData sebagai "lowongan perusahaan"
-    return magangData.slice(0, 3);
-  }, []);
+  const perusahaanLowonganSaya = useMemo(() => magangData.slice(0, 3), []);
 
-  // 🔹 Klik tanggal
   const handleDayClick = (day: number) => {
     setSelectedDay(day);
     setEvents(eventData[day] || []);
@@ -97,7 +90,6 @@ export default function DashboardPage() {
 
   const username = role === "perusahaan" ? "Perusahaan" : role === "mahasiswa" ? "Mahasiswa" : "";
 
-  // loading state
   if (!role) {
     return (
       <div className="min-h-screen grid place-items-center bg-[#F8FAFC] text-[#0F172A]">
@@ -108,7 +100,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-[#0F172A]">
-      {/* ✅ Navbar */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm py-4 px-6 flex justify-between items-center border-b">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-extrabold">Magangin</h1>
@@ -136,7 +127,6 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* ✅ Hero */}
       <section className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-white rounded-b-[40px] p-8 md:p-10 text-center shadow-lg">
         <h2 className="text-3xl md:text-4xl font-extrabold leading-snug mb-3">
           {role === "perusahaan" ? (
@@ -156,18 +146,17 @@ export default function DashboardPage() {
             : "Jelajahi peluang magang dari berbagai perusahaan dan pantau proses lamaranmu."}
         </p>
 
-        {/* ✅ Quick Action sesuai role */}
         <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
           {role === "perusahaan" ? (
             <>
               <button
-                onClick={() => alert("Fitur buat lowongan masih demo. Nanti bisa dibuat halaman /lowongan/create ya.")}
+                onClick={() => router.push("/lowongan/create")}
                 className="px-5 py-2.5 rounded-xl bg-[#F59E0B] text-[#0F172A] font-extrabold hover:bg-[#e19a0b] transition active:scale-[0.98]"
               >
                 + Buat Lowongan
               </button>
               <button
-                onClick={() => alert("Fitur kandidat masih demo. Nanti bisa dibuat halaman /kandidat.")}
+                onClick={() => router.push("/kandidat")}
                 className="px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white font-semibold hover:bg-white/15 transition active:scale-[0.98]"
               >
                 Lihat Kandidat
@@ -192,9 +181,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* ✅ Konten */}
       <main className="flex-1 px-6 py-10 max-w-6xl w-full mx-auto space-y-12">
-        {/* ✅ STAT CARDS sesuai role */}
         <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {role === "mahasiswa" ? (
             <>
@@ -213,9 +200,7 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* ✅ Grid utama: kiri rekomendasi/lowongan, kanan kalender */}
         <section className="grid md:grid-cols-2 gap-8">
-          {/* LEFT */}
           <div>
             <h3 className="text-xl font-extrabold mb-4 flex items-center gap-2">
               <span>{role === "perusahaan" ? "📌" : "🔥"}</span>
@@ -246,13 +231,13 @@ export default function DashboardPage() {
                   {role === "perusahaan" ? (
                     <div className="grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => alert("Demo: edit lowongan (bisa buat halaman /lowongan/edit/[id])")}
+                        onClick={() => router.push(`/lowongan/edit/${item.id}`)}
                         className="w-full border border-gray-300 text-[#0F172A] text-sm py-2 rounded-xl hover:bg-gray-100 transition"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => alert("Demo: lihat kandidat untuk lowongan ini")}
+                        onClick={() => router.push("/kandidat")}
                         className="w-full bg-[#F59E0B] text-white text-sm py-2 rounded-xl font-semibold hover:bg-[#d78909] transition"
                       >
                         Kandidat
@@ -280,22 +265,17 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* RIGHT: Kalender */}
           <div>
             <h3 className="text-xl font-extrabold mb-4 flex items-center gap-2">
               <span>📅</span> Jadwal Magang
             </h3>
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <p className="text-sm text-gray-600 mb-4 font-semibold text-center">
-                Oktober 2025
-              </p>
+              <p className="text-sm text-gray-600 mb-4 font-semibold text-center">Oktober 2025</p>
 
               <div className="grid grid-cols-7 text-center gap-1 text-sm mb-4">
                 {["S", "S", "R", "K", "J", "S", "M"].map((d, i) => (
-                  <div key={i} className="font-semibold text-gray-400">
-                    {d}
-                  </div>
+                  <div key={i} className="font-semibold text-gray-400">{d}</div>
                 ))}
 
                 {[...Array(31)].map((_, i) => {
@@ -323,15 +303,10 @@ export default function DashboardPage() {
 
               {selectedDay && (
                 <div className="bg-[#F9FAFB] p-4 rounded-xl border text-sm text-gray-700 mb-4">
-                  <p className="font-semibold mb-2">
-                    📆 Jadwal tanggal {selectedDay} Oktober:
-                  </p>
-
+                  <p className="font-semibold mb-2">📆 Jadwal tanggal {selectedDay} Oktober:</p>
                   {events.length ? (
                     <ul className="list-disc list-inside space-y-1">
-                      {events.map((e, idx) => (
-                        <li key={idx}>{e}</li>
-                      ))}
+                      {events.map((e, idx) => <li key={idx}>{e}</li>)}
                     </ul>
                   ) : (
                     <p>Tidak ada kegiatan magang hari ini.</p>
@@ -340,7 +315,7 @@ export default function DashboardPage() {
               )}
 
               <button
-                onClick={() => alert("Kalender lengkap masih coming soon")}
+                onClick={() => router.push("/kalender")}
                 className="w-full border border-gray-300 text-[#0F172A] text-sm py-2 rounded-xl hover:bg-gray-100 transition"
               >
                 Lihat Kalender Lengkap
@@ -349,10 +324,8 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* ✅ Section role-based tambahan */}
         {role === "mahasiswa" ? (
           <>
-            {/* Lamaran Saya */}
             <section className="bg-white rounded-3xl p-7 shadow-sm border border-gray-100">
               <h3 className="text-xl font-extrabold mb-4 flex items-center gap-2">
                 <span>📝</span> Lamaran Saya
@@ -363,17 +336,14 @@ export default function DashboardPage() {
                   <div key={i} className="rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition">
                     <div className="font-semibold text-[#0F172A]">{l.perusahaan}</div>
                     <div className="text-sm text-gray-600">{l.posisi}</div>
-
-                    <div className="mt-3">
-                      <BadgeStatus status={l.status} />
-                    </div>
+                    <div className="mt-3"><BadgeStatus status={l.status} /></div>
                   </div>
                 ))}
               </div>
 
               <div className="mt-4 text-center">
                 <button
-                  onClick={() => alert("Demo: halaman lamaran belum dibuat. Bisa nanti /lamaran")}
+                  onClick={() => router.push("/lamaran")}
                   className="bg-[#F59E0B] text-white px-6 py-2 rounded-xl font-semibold hover:bg-[#d78909] transition"
                 >
                   Lihat Semua Lamaran
@@ -381,7 +351,6 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* Cerita Magang */}
             <section className="bg-[#0F172A] text-white rounded-3xl p-8 shadow-lg">
               <h3 className="text-xl font-extrabold mb-6 flex items-center gap-2">
                 <span>💬</span> Cerita Peserta Magang
@@ -389,10 +358,7 @@ export default function DashboardPage() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 {reviewData.map((r, i) => (
-                  <div
-                    key={i}
-                    className="bg-[#1E293B] p-5 rounded-2xl shadow-md hover:shadow-lg transition"
-                  >
+                  <div key={i} className="bg-[#1E293B] p-5 rounded-2xl shadow-md hover:shadow-lg transition">
                     <p className="text-sm mb-3 leading-relaxed">{r.teks}</p>
                     <p className="text-[#F59E0B] text-xs font-semibold">{r.nama}</p>
                   </div>
@@ -400,7 +366,6 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* Q&A (Mahasiswa saja) */}
             <section>
               <h3 className="text-xl font-extrabold mb-4 flex items-center gap-2">
                 <span>❓</span> Q&A Terbaru
@@ -408,10 +373,7 @@ export default function DashboardPage() {
 
               <div className="space-y-3 mb-6">
                 {qnaData.map((q, i) => (
-                  <div
-                    key={i}
-                    className="bg-white rounded-2xl border border-gray-100 p-4 text-sm shadow-sm hover:shadow-md transition"
-                  >
+                  <div key={i} className="bg-white rounded-2xl border border-gray-100 p-4 text-sm shadow-sm hover:shadow-md transition">
                     <p className="font-semibold text-[#0F172A] mb-1">{q.q}</p>
                     <p className="text-gray-600">{q.a}</p>
                   </div>
@@ -430,25 +392,22 @@ export default function DashboardPage() {
           </>
         ) : (
           <>
-            {/* Kandidat terbaru (Perusahaan) */}
             <section className="bg-white rounded-3xl p-7 shadow-sm border border-gray-100">
               <h3 className="text-xl font-extrabold mb-4 flex items-center gap-2">
                 <span>🧑‍💻</span> Kandidat Terbaru
               </h3>
 
               <div className="grid md:grid-cols-3 gap-3">
-                {kandidatTerbaru.map((k, i) => (
-                  <div key={i} className="rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition">
+                {kandidatTerbaru.map((k) => (
+                  <div key={k.id} className="rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition">
                     <div className="font-semibold text-[#0F172A]">{k.nama}</div>
                     <div className="text-sm text-gray-600">{k.kampus}</div>
                     <div className="text-sm text-gray-600 mt-1">Posisi: {k.posisi}</div>
 
-                    <div className="mt-3">
-                      <BadgeStatus status={k.status} />
-                    </div>
+                    <div className="mt-3"><BadgeStatus status={k.status} /></div>
 
                     <button
-                      onClick={() => alert("Demo: detail kandidat belum dibuat")}
+                      onClick={() => router.push(`/kandidat/${k.id}`)}
                       className="mt-3 w-full border border-gray-300 text-[#0F172A] text-sm py-2 rounded-xl hover:bg-gray-100 transition"
                     >
                       Lihat Detail
@@ -458,20 +417,19 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* Tips singkat perusahaan */}
             <section className="bg-[#0F172A] text-white rounded-3xl p-8 shadow-lg">
               <h3 className="text-xl font-extrabold mb-3 flex items-center gap-2">
                 <span>🎯</span> Tips Rekrutmen Cepat
               </h3>
               <ul className="text-sm text-gray-200 space-y-2 list-disc list-inside">
                 <li>Buat deskripsi posisi yang jelas: skill wajib & skill nilai plus.</li>
-                <li>Tambahkan rentang durasi magang dan benefit (uang saku/transport).</li>
-                <li>Gunakan tahap seleksi sederhana: CV → interview → final.</li>
+                <li>Tambahkan durasi magang dan benefit (uang saku/transport).</li>
+                <li>Tahap seleksi sederhana: CV → interview → final.</li>
               </ul>
 
               <div className="mt-5">
                 <button
-                  onClick={() => alert("Demo: template lowongan belum dibuat")}
+                  onClick={() => router.push("/lowongan/create")}
                   className="bg-[#F59E0B] text-[#0F172A] px-6 py-2 rounded-xl font-extrabold hover:bg-[#e19a0b] transition"
                 >
                   Pakai Template Lowongan
@@ -482,7 +440,6 @@ export default function DashboardPage() {
         )}
       </main>
 
-      {/* ✅ Footer */}
       <footer className="py-6 text-center text-xs text-gray-500 border-t mt-10">
         © {new Date().getFullYear()} Magangin. Semua hak dilindungi.
       </footer>
@@ -490,21 +447,7 @@ export default function DashboardPage() {
   );
 }
 
-/* =========================
-   Small UI Components
-========================= */
-
-function StatCard({
-  title,
-  value,
-  desc,
-  icon,
-}: {
-  title: string;
-  value: string;
-  desc: string;
-  icon: string;
-}) {
+function StatCard({ title, value, desc, icon }: { title: string; value: string; desc: string; icon: string }) {
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition">
       <div className="flex items-start justify-between">
