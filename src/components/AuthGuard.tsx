@@ -1,42 +1,43 @@
 "use client";
 
-import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type Role = "mahasiswa" | "perusahaan";
 
 export default function AuthGuard({
+  allow,
   children,
-  allow = ["mahasiswa", "perusahaan"],
-  redirectTo = "/",
 }: {
+  allow: Role[];
   children: React.ReactNode;
-  allow?: Role[];
-  redirectTo?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [ok, setOk] = useState(false);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const logged = localStorage.getItem("isLoggedIn") === "true";
     const role = localStorage.getItem("role") as Role | null;
 
-    if (!isLoggedIn || !role) {
-      router.replace(redirectTo);
+    if (!logged || !role) {
+      router.replace("/");
       return;
     }
-
     if (!allow.includes(role)) {
       router.replace("/dashboard");
       return;
     }
+    setOk(true);
+  }, [router, pathname, allow]);
 
-    // kalau sudah login, jangan balik ke login page
-    if (pathname === "/") {
-      // boleh, tapi kalau kamu ingin tetap bisa akses / untuk debug, hapus block ini
-      // router.replace("/dashboard");
-    }
-  }, [router, allow, redirectTo, pathname]);
+  if (!ok) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-[#F8FAFC] text-[#0F172A]">
+        <div className="text-sm text-slate-600">Memuat...</div>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }
