@@ -51,6 +51,8 @@ export default function MagangDetailPage() {
   }
 
   function applyNow() {
+    if (!item) return;
+
     const role = getRole();
     if (role !== "mahasiswa") {
       alert("Hanya akun mahasiswa yang bisa melamar (mode demo).");
