@@ -90,6 +90,7 @@ function MobileNav() {
 ====================== */
 
 function renderNavItem(pathname: string) {
+  // eslint-disable-next-line react/display-name
   return (l: { href: string; label: string; icon: string }) => {
     const active =
       pathname === l.href ||

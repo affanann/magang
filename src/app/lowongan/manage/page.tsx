@@ -1,219 +1,92 @@
+// src/app/lowongan/manage/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import AuthGuard from "@/components/AuthGuard";
-import { getCompanyJobs, setCompanyJobs, uid, Job } from "@/lib/storage";
+import Link from "next/link";
+import {
+  Job,
+  JobStatus,
+  getCompanyJobs,
+  setCompanyJobs,
+  uid,
+} from "@/lib/storage";
 
 export default function LowonganManagePage() {
   const router = useRouter();
+  const ownerId = useMemo(() => uid(), []);
 
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-
-  const [perusahaan, setPerusahaan] = useState("Perusahaan Demo");
-  const [posisi, setPosisi] = useState("");
-  const [lokasi, setLokasi] = useState("");
-  const [tanggal, setTanggal] = useState("Oktober 2025");
-  const [deskripsi, setDeskripsi] = useState("");
 
   useEffect(() => {
-    setJobs(getCompanyJobs());
-  }, []);
-
-  const isEditing = useMemo(() => editingId !== null, [editingId]);
-
-  function resetForm() {
-    setEditingId(null);
-    setPosisi("");
-    setLokasi("");
-    setTanggal("Oktober 2025");
-    setDeskripsi("");
-  }
-
-  function submit() {
-    if (!posisi || !lokasi || !tanggal || !deskripsi) {
-      alert("Lengkapi semua field dulu.");
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const role = localStorage.getItem("role");
+    if (!loggedIn || role !== "perusahaan") {
+      router.replace("/");
       return;
     }
+    setJobs(getCompanyJobs(ownerId));
+  }, [ownerId, router]);
 
-    if (isEditing && editingId) {
-      const next = jobs.map((j) =>
-        j.id === editingId
-          ? {
-              ...j,
-              perusahaan: perusahaan.trim(),
-              posisi: posisi.trim(),
-              lokasi: lokasi.trim(),
-              tanggal: tanggal.trim(),
-              deskripsi: deskripsi.trim(),
-            }
-          : j
-      );
-      setJobs(next);
-      setCompanyJobs(next);
-      resetForm();
-      return;
-    }
-
-    const newJob: Job = {
-      id: uid("job"),
-      perusahaan: perusahaan.trim(),
-      posisi: posisi.trim(),
-      lokasi: lokasi.trim(),
-      tanggal: tanggal.trim(),
-      deskripsi: deskripsi.trim(),
-      status: "aktif",
-    };
-
-    const next = [newJob, ...jobs];
+  function persist(next: Job[]) {
     setJobs(next);
-    setCompanyJobs(next);
-    resetForm();
+    setCompanyJobs(next, ownerId);
   }
 
-  function edit(job: Job) {
-    setEditingId(job.id);
-    setPerusahaan(job.perusahaan);
-    setPosisi(job.posisi);
-    setLokasi(job.lokasi);
-    setTanggal(job.tanggal);
-    setDeskripsi(job.deskripsi);
+  function toggleStatus(jobId: string) {
+    const next = jobs.map((j) =>
+      j.id === jobId
+        ? { ...j, status: (j.status === "aktif" ? "tutup" : "aktif") as JobStatus }
+        : j
+    );
+    persist(next);
   }
 
   function remove(jobId: string) {
-    if (!confirm("Hapus lowongan ini?")) return;
     const next = jobs.filter((j) => j.id !== jobId);
-    setJobs(next);
-    setCompanyJobs(next);
-    if (editingId === jobId) resetForm();
-  }
-
-  function close(jobId: string) {
-    const nowJobs = jobs.map((j) =>
-      j.id === jobId ? { ...j, status: "tutup" as const } : j
-    );
-    setJobs(nowJobs);
-    setCompanyJobs(nowJobs);
-  }
-
-  function open(jobId: string) {
-    const nowJobs = jobs.map((j) =>
-      j.id === jobId ? { ...j, status: "aktif" as const } : j
-    );
-    setJobs(nowJobs);
-    setCompanyJobs(nowJobs);
+    persist(next);
   }
 
   return (
-    <AuthGuard allow={["perusahaan"]}>
-      <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
-        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b">
-          <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div>
-              <div className="text-lg font-extrabold">Kelola Lowongan</div>
-              <div className="text-xs text-slate-500">
-                Tambah / edit / tutup lowongan (mode demo)
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => router.push("/dashboard")}
-                className="px-4 py-2 rounded-xl border border-gray-300 text-sm hover:bg-gray-100 transition"
-              >
-                Dashboard
-              </button>
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div>
+            <div className="text-lg font-extrabold">Kelola Lowongan</div>
+            <div className="text-xs text-slate-500">
+              Buat, edit, dan tutup lowongan
             </div>
           </div>
-        </header>
-
-        <main className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-          {/* Form */}
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div>
-                <div className="text-base font-extrabold">
-                  {isEditing ? "Edit Lowongan" : "Tambah Lowongan"}
-                </div>
-                <div className="text-xs text-slate-500 mt-1">
-                  Isi data lowongan agar tampil di aplikasi (demo).
-                </div>
-              </div>
-
-              {isEditing && (
-                <button
-                  onClick={resetForm}
-                  className="px-4 py-2 rounded-xl border border-gray-300 text-sm hover:bg-gray-100 transition"
-                >
-                  Batal Edit
-                </button>
-              )}
-            </div>
-
-            <div className="mt-4 grid md:grid-cols-2 gap-3">
-              <Field label="Perusahaan">
-                <input
-                  value={perusahaan}
-                  onChange={(e) => setPerusahaan(e.target.value)}
-                  className="w-full h-11 rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:ring-2 focus:ring-[#F59E0B]/30"
-                  placeholder="Nama perusahaan"
-                />
-              </Field>
-
-              <Field label="Posisi">
-                <input
-                  value={posisi}
-                  onChange={(e) => setPosisi(e.target.value)}
-                  className="w-full h-11 rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:ring-2 focus:ring-[#F59E0B]/30"
-                  placeholder="Contoh: UI/UX Intern"
-                />
-              </Field>
-
-              <Field label="Lokasi">
-                <input
-                  value={lokasi}
-                  onChange={(e) => setLokasi(e.target.value)}
-                  className="w-full h-11 rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:ring-2 focus:ring-[#F59E0B]/30"
-                  placeholder="Contoh: Palembang"
-                />
-              </Field>
-
-              <Field label="Tanggal">
-                <input
-                  value={tanggal}
-                  onChange={(e) => setTanggal(e.target.value)}
-                  className="w-full h-11 rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:ring-2 focus:ring-[#F59E0B]/30"
-                  placeholder="Contoh: Oktober 2025"
-                />
-              </Field>
-
-              <div className="md:col-span-2">
-                <Field label="Deskripsi">
-                  <textarea
-                    value={deskripsi}
-                    onChange={(e) => setDeskripsi(e.target.value)}
-                    className="w-full min-h-[110px] rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#F59E0B]/30"
-                    placeholder="Tulis ringkasan pekerjaan, kualifikasi, benefit, dll."
-                  />
-                </Field>
-              </div>
-            </div>
-
-            <button
-              onClick={submit}
-              className="mt-4 w-full h-11 rounded-2xl bg-[#F59E0B] text-white font-extrabold hover:bg-[#d78909] transition"
+          <div className="flex items-center gap-2">
+            <Link
+              href="/lowongan/create"
+              className="px-4 py-2 rounded-xl bg-[#F59E0B] text-white text-sm font-extrabold hover:bg-[#d78909] transition"
             >
-              {isEditing ? "Simpan Perubahan" : "Tambah Lowongan"}
-            </button>
+              + Buat Lowongan
+            </Link>
+            <Link
+              href="/dashboard"
+              className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50 transition"
+            >
+              Dashboard
+            </Link>
           </div>
+        </div>
+      </header>
 
-          {/* List */}
+      <main className="max-w-6xl mx-auto px-6 py-8">
+        {jobs.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm text-center">
+            <div className="text-sm text-slate-600">
+              Belum ada lowongan. Klik <b>Buat Lowongan</b> untuk menambahkan.
+            </div>
+          </div>
+        ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {jobs.map((j) => (
               <div
                 key={j.id}
-                className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6"
+                className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -223,56 +96,39 @@ export default function LowonganManagePage() {
                       📍 {j.lokasi} • 📅 {j.tanggal}
                     </div>
                   </div>
+
                   <span
                     className={
-                      "text-xs font-extrabold px-2.5 py-1 rounded-full border " +
+                      "px-3 py-1 rounded-full text-xs font-extrabold border " +
                       (j.status === "aktif"
                         ? "bg-green-50 text-green-700 border-green-200"
                         : "bg-rose-50 text-rose-700 border-rose-200")
                     }
                   >
-                    {j.status === "aktif" ? "AKTIF" : "TUTUP"}
+                    {j.status === "aktif" ? "Aktif" : "Tutup"}
                   </span>
                 </div>
 
-                <p className="text-sm text-slate-700 mt-3 line-clamp-3">
+                <p className="text-sm text-slate-700 mt-4 line-clamp-3">
                   {j.deskripsi}
                 </p>
 
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => edit(j)}
-                    className="h-10 rounded-2xl border border-gray-300 text-sm font-semibold hover:bg-gray-100 transition"
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  <Link
+                    href={`/lowongan/edit/${j.id}`}
+                    className="text-center px-3 py-2 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50 transition"
                   >
                     Edit
-                  </button>
-
-                  {j.status === "aktif" ? (
-                    <button
-                      onClick={() => close(j.id)}
-                      className="h-10 rounded-2xl bg-[#0F172A] text-white text-sm font-semibold hover:bg-[#1b2a44] transition"
-                    >
-                      Tutup
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => open(j.id)}
-                      className="h-10 rounded-2xl bg-[#0F172A] text-white text-sm font-semibold hover:bg-[#1b2a44] transition"
-                    >
-                      Buka
-                    </button>
-                  )}
-
+                  </Link>
                   <button
-                    onClick={() => router.push(`/magang/${j.id}`)}
-                    className="col-span-2 h-10 rounded-2xl border border-gray-300 text-sm font-semibold hover:bg-gray-100 transition"
+                    onClick={() => toggleStatus(j.id)}
+                    className="px-3 py-2 rounded-xl bg-[#0F172A] text-white text-sm font-semibold hover:opacity-95 transition"
                   >
-                    Lihat Detail Lowongan
+                    {j.status === "aktif" ? "Tutup" : "Buka"}
                   </button>
-
                   <button
                     onClick={() => remove(j.id)}
-                    className="col-span-2 h-10 rounded-2xl border border-rose-200 text-rose-700 text-sm font-extrabold hover:bg-rose-50 transition"
+                    className="px-3 py-2 rounded-xl border border-rose-200 text-sm font-semibold text-rose-700 hover:bg-rose-50 transition"
                   >
                     Hapus
                   </button>
@@ -280,29 +136,8 @@ export default function LowonganManagePage() {
               </div>
             ))}
           </div>
-
-          {jobs.length === 0 && (
-            <div className="text-center text-sm text-slate-500">
-              Belum ada lowongan. Tambahkan dulu dari form di atas.
-            </div>
-          )}
-        </main>
-      </div>
-    </AuthGuard>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1">
-      <div className="text-xs font-bold text-slate-600">{label}</div>
-      {children}
+        )}
+      </main>
     </div>
   );
 }

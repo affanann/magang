@@ -1,175 +1,136 @@
+// src/app/magang/[id]/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import AuthGuard from "@/components/AuthGuard";
+import Link from "next/link";
 import { magangData } from "@/data/magangData";
 import {
-  getApplications,
-  getCompanyJobs,
+  addApplication,
   getRole,
-  setApplications,
-  uid,
-  Application,
+  getMyApplications,
+  Lamaran,
 } from "@/lib/storage";
 
 export default function MagangDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const [role, setRole] = useState<"mahasiswa" | "perusahaan">("mahasiswa");
+  const id = (params?.id as string) || "";
+
+  const item = useMemo(
+    () => magangData.find((x) => String(x.id) === String(id)),
+    [id]
+  );
+
+  const [already, setAlready] = useState(false);
 
   useEffect(() => {
-    const r = getRole();
-    if (r) setRole(r);
-  }, []);
-
-  const job = useMemo(() => {
-    const id = String(params.id);
-
-    // 1) cek companyJobs
-    const cj = getCompanyJobs().find((x) => x.id === id);
-    if (cj) {
-      return {
-        id: cj.id,
-        perusahaan: cj.perusahaan,
-        posisi: cj.posisi,
-        lokasi: cj.lokasi,
-        tanggal: cj.tanggal,
-        deskripsi: cj.deskripsi,
-      };
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (!loggedIn) {
+      router.replace("/");
+      return;
     }
+    const apps = getMyApplications();
+    setAlready(apps.some((a) => a.jobId === String(id)));
+  }, [id, router]);
 
-    // 2) cek magangData
-    const md = magangData.find((x) => String(x.id) === id);
-    if (!md) return null;
+  if (!item) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-[#F8FAFC] text-[#0F172A] px-6">
+        <div className="w-full max-w-md bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+          <div className="text-sm font-semibold">Lowongan tidak ditemukan.</div>
+          <Link
+            href="/lowongan"
+            className="inline-flex mt-3 px-4 py-2 rounded-xl bg-[#F59E0B] text-white font-semibold hover:bg-[#d78909] transition"
+          >
+            Kembali
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-    return {
-      id: String(md.id),
-      perusahaan: md.perusahaan,
-      posisi: md.posisi,
-      lokasi: md.lokasi,
-      tanggal: md.tanggal,
-      deskripsi:
-        "Deskripsi lowongan belum tersedia (dummy). Kamu bisa menambahkan deskripsi lebih lengkap nanti.",
-    };
-  }, [params.id]);
-
-  function apply() {
-    if (!job) return;
-
+  function applyNow() {
+    const role = getRole();
     if (role !== "mahasiswa") {
-      alert("Aksi melamar hanya untuk akun mahasiswa.");
+      alert("Hanya akun mahasiswa yang bisa melamar (mode demo).");
       return;
     }
 
-    const apps = getApplications();
-    const already = apps.some((a) => a.jobId === job.id);
-    if (already) {
-      alert("Kamu sudah melamar lowongan ini.");
-      router.push("/lamaran");
-      return;
-    }
-
-    const newApp: Application = {
-      id: uid("app"),
-      jobId: job.id,
-      perusahaan: job.perusahaan,
-      posisi: job.posisi,
-      tanggal: job.tanggal,
+    const app: Lamaran = {
+      id: `app_${Date.now()}`,
+      jobId: String(item.id),
+      perusahaan: item.perusahaan,
+      posisi: item.posisi,
       status: "Dikirim",
+      createdAt: Date.now(),
+      applicantName: "Mahasiswa Demo",
     };
 
-    setApplications([newApp, ...apps]);
-    alert("Lamaran berhasil dikirim ✅");
-    router.push("/lamaran");
+    // ✅ jangan kirim argumen tambahan
+    addApplication(app);
+    setAlready(true);
+    alert("Lamaran berhasil dikirim (demo)!");
   }
 
   return (
-    <AuthGuard allow={["mahasiswa", "perusahaan"]}>
-      <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
-        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b">
-          <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div className="text-lg font-extrabold">Detail Lowongan</div>
-            <button
-              onClick={() => router.back()}
-              className="px-4 py-2 rounded-xl border border-gray-300 text-sm hover:bg-gray-100 transition"
-            >
-              Kembali
-            </button>
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link
+            href="/lowongan"
+            className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50 transition"
+          >
+            Kembali
+          </Link>
+          <Link
+            href="/dashboard"
+            className="px-4 py-2 rounded-xl bg-[#0F172A] text-white text-sm font-semibold hover:opacity-95 transition"
+          >
+            Dashboard
+          </Link>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-6 py-8">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-7">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-2xl font-extrabold">{item.posisi}</div>
+              <div className="text-sm text-slate-600">{item.perusahaan}</div>
+              <div className="text-xs text-slate-500 mt-2">
+                📍 {item.lokasi} • 📅 {item.tanggal}
+              </div>
+            </div>
+
+            <span className="px-3 py-1 rounded-full text-xs font-extrabold border bg-[#F59E0B]/10 text-[#b57407] border-[#F59E0B]/20">
+              Populer
+            </span>
           </div>
-        </header>
 
-        <main className="max-w-4xl mx-auto px-6 py-8">
-          {!job ? (
-            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-              <div className="font-semibold">Lowongan tidak ditemukan.</div>
-              <button
-                onClick={() => router.push("/lowongan")}
-                className="mt-4 px-5 py-2 rounded-xl bg-[#F59E0B] text-white font-semibold hover:bg-[#d78909] transition"
-              >
-                Kembali ke Lowongan
-              </button>
+          <div className="mt-6 text-sm text-slate-700 leading-relaxed">
+            {item.deskripsi || "Deskripsi belum tersedia (demo)."}
+          </div>
+
+          <div className="mt-6">
+            <button
+              disabled={already}
+              onClick={applyNow}
+              className={
+                "w-full px-6 py-3 rounded-2xl font-extrabold transition " +
+                (already
+                  ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                  : "bg-[#F59E0B] text-white hover:bg-[#d78909]")
+              }
+            >
+              {already ? "Sudah Melamar" : "Lamar Sekarang"}
+            </button>
+            <div className="text-[12px] text-slate-500 mt-2">
+              *Mode demo: lamaran disimpan ke localStorage.
             </div>
-          ) : (
-            <div className="bg-white rounded-3xl p-7 border border-gray-100 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-2xl font-extrabold">{job.posisi}</div>
-                  <div className="text-slate-600 mt-1">{job.perusahaan}</div>
-                </div>
-
-                <span className="text-xs px-3 py-1 rounded-full bg-[#F59E0B]/10 text-[#b57407] font-semibold">
-                  {role === "mahasiswa" ? "Mahasiswa" : "Perusahaan"}
-                </span>
-              </div>
-
-              <div className="mt-4 grid sm:grid-cols-3 gap-3">
-                <Info label="Lokasi" value={job.lokasi} />
-                <Info label="Periode" value={job.tanggal} />
-                <Info label="Status" value="Open" />
-              </div>
-
-              <div className="mt-6">
-                <div className="font-extrabold mb-2">Deskripsi</div>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  {job.deskripsi}
-                </p>
-              </div>
-
-              <div className="mt-6 grid sm:grid-cols-2 gap-2">
-                <button
-                  onClick={() => router.push("/lowongan")}
-                  className="h-11 rounded-xl border border-gray-300 text-sm hover:bg-gray-100 transition"
-                >
-                  Kembali ke Lowongan
-                </button>
-
-                <button
-                  onClick={apply}
-                  className="h-11 rounded-xl bg-[#F59E0B] text-white font-extrabold hover:bg-[#d78909] transition"
-                >
-                  Lamar Sekarang
-                </button>
-              </div>
-
-              {role !== "mahasiswa" && (
-                <p className="text-[12px] text-slate-500 mt-3">
-                  * Perusahaan tidak bisa melamar. Ini sesuai pembagian akses fitur.
-                </p>
-              )}
-            </div>
-          )}
-        </main>
-      </div>
-    </AuthGuard>
-  );
-}
-
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-gray-100 p-4">
-      <div className="text-xs text-slate-500">{label}</div>
-      <div className="font-semibold">{value}</div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

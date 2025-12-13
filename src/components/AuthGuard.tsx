@@ -1,43 +1,38 @@
+// src/components/AuthGuard.tsx
 "use client";
 
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-type Role = "mahasiswa" | "perusahaan";
+import { getRole, isLoggedIn, Role } from "@/lib/storage";
 
 export default function AuthGuard({
-  allow,
   children,
+  allow,
 }: {
-  allow: Role[];
   children: React.ReactNode;
+  allow?: Role[]; // contoh: allow={["perusahaan"]}
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [ok, setOk] = useState(false);
 
   useEffect(() => {
-    const logged = localStorage.getItem("isLoggedIn") === "true";
-    const role = localStorage.getItem("role") as Role | null;
+    const ok = isLoggedIn();
+    const role = getRole();
 
-    if (!logged || !role) {
+    if (!ok || !role) {
       router.replace("/");
       return;
     }
-    if (!allow.includes(role)) {
+
+    if (allow && confirmRole(allow, role) === false) {
       router.replace("/dashboard");
       return;
     }
-    setOk(true);
   }, [router, pathname, allow]);
 
-  if (!ok) {
-    return (
-      <div className="min-h-screen grid place-items-center bg-[#F8FAFC] text-[#0F172A]">
-        <div className="text-sm text-slate-600">Memuat...</div>
-      </div>
-    );
-  }
-
   return <>{children}</>;
+}
+
+function confirmRole(allow: Role[], role: Role) {
+  return allow.includes(role);
 }
