@@ -4,8 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-
 import Input from "@/components/Input";
+
+type Role = "mahasiswa" | "perusahaan";
+type User = { email: string; password: string; role: Role; name?: string };
+
+function getUsers(): User[] {
+  try {
+    const raw = localStorage.getItem("users");
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,19 +34,41 @@ export default function LoginPage() {
     }
 
     setLoading(true);
+
     setTimeout(() => {
+      const cleanEmail = email.trim().toLowerCase();
+      const users = getUsers();
+
+      const found = users.find(
+        (u) => u.email.toLowerCase() === cleanEmail && u.password === password
+      );
+
+      if (!found) {
+        setLoading(false);
+        alert("Email atau kata sandi salah / akun belum terdaftar.");
+        return;
+      }
+
+      // ✅ login normal: role diambil dari data akun
       localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("role", found.role);
+
+      // optional: simpan email biar gampang dipakai di profil
+      localStorage.setItem("currentUserEmail", found.email);
+
       router.push("/dashboard");
-    }, 600);
+    }, 500);
   };
 
-  const quickLogin = (role: "mahasiswa" | "perusahaan") => {
+  // ✅ DEMO LOGIN: tanpa input email/password
+  const demoLogin = (role: Role) => {
     setLoading(true);
     setTimeout(() => {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("role", role);
+      localStorage.setItem("isDemo", "true"); // optional penanda demo
       router.push("/dashboard");
-    }, 400);
+    }, 250);
   };
 
   return (
@@ -89,11 +124,7 @@ export default function LoginPage() {
               </div>
 
               {/* PRIMARY BUTTON */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary-yellow"
-              >
+              <button type="submit" disabled={loading} className="btn-primary-yellow">
                 <span className="relative z-10">
                   {loading ? "Memproses..." : "Masuk"}
                 </span>
@@ -110,12 +141,12 @@ export default function LoginPage() {
                 </Link>
               </p>
 
-              {/* Quick login */}
+              {/* Demo login (untuk dosen biar cepat) */}
               <div className="pt-2 space-y-2">
                 <button
                   type="button"
                   disabled={loading}
-                  onClick={() => quickLogin("mahasiswa")}
+                  onClick={() => demoLogin("mahasiswa")}
                   className="btn-secondary"
                 >
                   Masuk sebagai Mahasiswa
@@ -124,12 +155,16 @@ export default function LoginPage() {
                 <button
                   type="button"
                   disabled={loading}
-                  onClick={() => quickLogin("perusahaan")}
+                  onClick={() => demoLogin("perusahaan")}
                   className="btn-secondary"
                 >
                   Masuk sebagai Perusahaan
                 </button>
               </div>
+
+              <p className="text-center text-[11px] text-slate-500 pt-1">
+                * Tombol di atas hanya untuk demo (tanpa input).
+              </p>
             </form>
           </div>
 
@@ -155,15 +190,12 @@ export default function LoginPage() {
           overflow: hidden;
           transition: transform 160ms ease, background 180ms ease;
         }
-
         .btn-primary-yellow:hover {
           background: #eab308;
         }
-
         .btn-primary-yellow:active {
           transform: scale(0.97);
         }
-
         .btn-primary-yellow:disabled {
           opacity: 0.65;
           cursor: not-allowed;
@@ -181,7 +213,6 @@ export default function LoginPage() {
           );
           transition: transform 420ms ease;
         }
-
         .btn-primary-yellow:hover .btn-shine {
           transform: translateX(120%);
         }
@@ -196,15 +227,12 @@ export default function LoginPage() {
           font-weight: 600;
           transition: background 200ms ease, transform 160ms ease, opacity 160ms ease;
         }
-
         .btn-secondary:hover {
           background: rgba(15, 26, 42, 0.05);
         }
-
         .btn-secondary:active {
           transform: scale(0.98);
         }
-
         .btn-secondary:disabled {
           opacity: 0.65;
           cursor: not-allowed;

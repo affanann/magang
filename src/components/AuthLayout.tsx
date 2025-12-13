@@ -1,20 +1,43 @@
-export default function AuthLayout({
-  title,
-  subtitle,
+"use client";
+
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+
+type Role = "mahasiswa" | "perusahaan";
+
+export default function AuthGuard({
   children,
+  allow = ["mahasiswa", "perusahaan"],
+  redirectTo = "/",
 }: {
-  title: string;
-  subtitle?: string;
   children: React.ReactNode;
+  allow?: Role[];
+  redirectTo?: string;
 }) {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-between bg-[#0F1A2A]">
-      <div className="w-full max-w-md bg-white flex flex-col items-center rounded-t-3xl mt-auto pb-10 pt-8 px-6 text-gray-800">
-        <h1 className="text-3xl font-extrabold mb-2 text-[#0F1A2A]">{title}</h1>
-        {subtitle && <p className="text-sm text-gray-600 mb-6 text-center">{subtitle}</p>}
-        {children}
-      </div>
-      <div className="text-xs text-gray-400 py-3">By <span className="font-semibold text-white">Hunter Nac</span></div>
-    </div>
-  );
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const role = localStorage.getItem("role") as Role | null;
+
+    // wajib login & wajib punya role
+    if (!isLoggedIn || !role) {
+      router.replace(redirectTo);
+      return;
+    }
+
+    // kalau role tidak boleh akses halaman ini
+    if (!allow.includes(role)) {
+      router.replace("/dashboard");
+      return;
+    }
+
+    // cegah balik ke login kalau sudah login
+    if (pathname === "/" || pathname.startsWith("/login")) {
+      router.replace("/dashboard");
+    }
+  }, [router, allow, redirectTo, pathname]);
+
+  return <>{children}</>;
 }
