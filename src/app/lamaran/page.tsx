@@ -64,12 +64,17 @@ export default function LamaranPage() {
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
               {apps.map((a) => (
-                <div key={a.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+                <div
+                  key={a.id}
+                  className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="font-extrabold text-lg">{a.posisi}</div>
                       <div className="text-sm text-slate-600">{a.perusahaan}</div>
-                      <div className="text-xs text-slate-500 mt-1">📅 {a.tanggal}</div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        📅 {a.tanggal}
+                      </div>
                     </div>
                     <Badge status={a.status} />
                   </div>
@@ -89,10 +94,20 @@ export default function LamaranPage() {
                     </button>
                   </div>
 
+                  {/* tombol status (demo) */}
                   <div className="mt-3 grid grid-cols-3 gap-2">
-                    <MiniBtn onClick={() => updateStatus(a.id, "Wawancara")} label="Wawancara" />
-                    <MiniBtn onClick={()={( ) => updateStatus(a.id, "Diterima")} label="Diterima" />
-                    <MiniBtn onClick={() => updateStatus(a.id, "Ditolak")} label="Ditolak" />
+                    <MiniBtn
+                      onClick={() => updateStatus(a.id, "Wawancara")}
+                      label="Wawancara"
+                    />
+                    <MiniBtn
+                      onClick={() => updateStatus(a.id, "Diterima")}
+                      label="Diterima"
+                    />
+                    <MiniBtn
+                      onClick={() => updateStatus(a.id, "Ditolak")}
+                      label="Ditolak"
+                    />
                   </div>
 
                   <p className="mt-3 text-[11px] text-slate-500">
@@ -132,7 +147,9 @@ function Badge({ status }: { status: string }) {
       : "bg-rose-50 text-rose-700 border-rose-200";
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${cls}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${cls}`}
+    >
       {status}
     </span>
   );
