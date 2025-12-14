@@ -49,53 +49,53 @@ export default function LoginPage() {
         return;
       }
 
-      // ✅ login normal: role diambil dari data akun
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("role", found.role);
-
-      // optional: simpan email biar gampang dipakai di profil
       localStorage.setItem("currentUserEmail", found.email);
 
       router.push("/dashboard");
-    }, 500);
+    }, 400);
   };
 
-  // ✅ DEMO LOGIN: tanpa input email/password
   const demoLogin = (role: Role) => {
     setLoading(true);
     setTimeout(() => {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("role", role);
-      localStorage.setItem("isDemo", "true"); // optional penanda demo
+      localStorage.setItem("isDemo", "true");
       router.push("/dashboard");
     }, 250);
   };
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center px-4 bg-animated">
-        <div className="relative w-full max-w-[380px]">
-          <div className="rounded-[26px] bg-white/90 backdrop-blur-xl shadow-[0_16px_50px_rgba(0,0,0,0.35)] ring-1 ring-white/20 p-6 sm:p-7">
+      <div className="min-h-screen bg-animated relative overflow-hidden flex items-center justify-center px-4">
+        {/* background */}
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-yellow-400/15 rounded-full blur-3xl animate-pulse z-0" />
+        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-blue-400/15 rounded-full blur-3xl animate-pulse z-0" />
+
+        <div className="relative w-full max-w-sm z-10">
+          <div className="rounded-3xl bg-white/90 backdrop-blur-xl shadow-2xl ring-1 ring-white/20 px-6 py-6 md:px-8 md:py-6">
             {/* Logo */}
-            <div className="flex justify-center mb-3">
-              <div className="rounded-2xl bg-white shadow-sm ring-1 ring-black/5 px-4 py-3">
+            <div className="flex justify-center mb-4">
+              <div className="rounded-2xl bg-white shadow ring-1 ring-black/5 px-5 py-3">
                 <Image
                   src="/logo-magangin.png"
                   alt="Magangin"
-                  width={150}
-                  height={150}
+                  width={110}
+                  height={110}
                   priority
-                  className="w-[140px] h-auto select-none"
+                  className="w-[92px] h-auto select-none"
                 />
               </div>
             </div>
 
             {/* Title */}
-            <h1 className="text-center text-xl sm:text-2xl font-extrabold text-[#0F1A2A]">
-              Masuk ke Magangin
+            <h1 className="text-center text-2xl md:text-[26px] font-extrabold text-[#0F1A2A] tracking-tight mb-1">
+              Selamat Datang 👋
             </h1>
-            <p className="text-center text-xs sm:text-sm text-slate-500 mt-1 mb-5">
-              Silakan masuk untuk melanjutkan
+            <p className="text-center text-[13px] text-slate-500 mb-5">
+              Masuk ke akun Magangin Anda untuk melanjutkan
             </p>
 
             {/* Form */}
@@ -114,7 +114,8 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
 
-              <div className="flex justify-end text-xs">
+              <div className="flex justify-between items-center text-xs">
+                <div />
                 <Link
                   href="/forgot"
                   className="font-semibold text-[#0F1A2A] hover:underline"
@@ -123,12 +124,15 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-              {/* PRIMARY BUTTON */}
-              <button type="submit" disabled={loading} className="btn-primary-yellow">
+              {/* Login button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-10 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-300 text-[#0F1A2A] font-bold shadow-md hover:from-yellow-300 hover:to-yellow-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 relative overflow-hidden"
+              >
                 <span className="relative z-10">
                   {loading ? "Memproses..." : "Masuk"}
                 </span>
-                <span className="btn-shine" />
               </button>
 
               <p className="text-center text-xs text-slate-600">
@@ -141,24 +145,30 @@ export default function LoginPage() {
                 </Link>
               </p>
 
-              {/* Demo login (untuk dosen biar cepat) */}
-              <div className="pt-2 space-y-2">
+              {/* Demo buttons */}
+              <div className="pt-1 space-y-2">
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => demoLogin("mahasiswa")}
-                  className="btn-secondary"
+                  className="demo-btn demo-yellow"
                 >
-                  Masuk sebagai Mahasiswa
+                  <span className="relative z-10">
+                    Masuk sebagai Mahasiswa
+                  </span>
+                  <span className="demo-sweep" />
                 </button>
 
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => demoLogin("perusahaan")}
-                  className="btn-secondary"
+                  className="demo-btn demo-blue"
                 >
-                  Masuk sebagai Perusahaan
+                  <span className="relative z-10">
+                    Masuk sebagai Perusahaan
+                  </span>
+                  <span className="demo-sweep" />
                 </button>
               </div>
 
@@ -168,74 +178,80 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <p className="text-center text-[11px] text-white/70 mt-4">
+          <p className="text-center text-[11px] text-white/70 mt-3">
             © {new Date().getFullYear()} Magangin
           </p>
         </div>
       </div>
 
+      {/* GLOBAL STYLE */}
       <style jsx global>{`
         .bg-animated {
           background: linear-gradient(135deg, #0b1220, #0f1a2a);
         }
 
-        .btn-primary-yellow {
+        /* DEMO BUTTON BASE */
+        .demo-btn {
           position: relative;
-          width: 100%;
-          height: 42px;
-          border-radius: 14px;
-          background: #f2c14e;
-          color: #0f1a2a;
-          font-weight: 700;
-          overflow: hidden;
-          transition: transform 160ms ease, background 180ms ease;
-        }
-        .btn-primary-yellow:hover {
-          background: #eab308;
-        }
-        .btn-primary-yellow:active {
-          transform: scale(0.97);
-        }
-        .btn-primary-yellow:disabled {
-          opacity: 0.65;
-          cursor: not-allowed;
-        }
-
-        .btn-shine {
-          position: absolute;
-          inset: 0;
-          transform: translateX(-120%);
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.35),
-            transparent
-          );
-          transition: transform 420ms ease;
-        }
-        .btn-primary-yellow:hover .btn-shine {
-          transform: translateX(120%);
-        }
-
-        .btn-secondary {
           width: 100%;
           height: 40px;
           border-radius: 14px;
-          border: 1px solid rgba(15, 26, 42, 0.15);
-          background: white;
-          color: #0f1a2a;
-          font-weight: 600;
-          transition: background 200ms ease, transform 160ms ease, opacity 160ms ease;
+          background: #ffffff;
+          font-weight: 700;
+          overflow: hidden;
+          transition: transform 160ms ease, box-shadow 160ms ease;
         }
-        .btn-secondary:hover {
-          background: rgba(15, 26, 42, 0.05);
+
+        .demo-btn:active {
+          transform: scale(0.985);
         }
-        .btn-secondary:active {
-          transform: scale(0.98);
-        }
-        .btn-secondary:disabled {
+
+        .demo-btn:disabled {
           opacity: 0.65;
           cursor: not-allowed;
+        }
+
+        .demo-sweep {
+          position: absolute;
+          inset: 0;
+          transform: translateX(-110%);
+          transition: transform 420ms ease;
+          z-index: 0;
+          opacity: 0.9;
+        }
+
+        .demo-btn:hover .demo-sweep {
+          transform: translateX(0%);
+        }
+
+        .demo-btn:hover {
+          box-shadow: 0 10px 24px rgba(15, 26, 42, 0.08);
+        }
+
+        /* MAHASISWA */
+        .demo-yellow {
+          border: 1px solid rgba(234, 179, 8, 0.45);
+          color: #0f1a2a;
+        }
+        .demo-yellow .demo-sweep {
+          background: linear-gradient(
+            90deg,
+            rgba(250, 204, 21, 0),
+            rgba(250, 204, 21, 0.85)
+          );
+        }
+
+        /* PERUSAHAAN */
+        .demo-blue {
+          border: 1px solid rgba(59, 130, 246, 0.35);
+          color: #0f1a2a;
+        }
+        .demo-blue .demo-sweep {
+          background: linear-gradient(
+            90deg,
+            rgba(59, 130, 246, 0),
+            rgba(59, 130, 246, 0.65)
+          );
         }
       `}</style>
     </>
